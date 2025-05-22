@@ -1,0 +1,83 @@
+body{
+    
+    font-family: "Lato", sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.navbar{
+    height: 5rem;
+    background-color: white;
+}
+
+
+
+.fa-compass{
+    color: #fe424d;
+    font-size: 3rem;
+}
+
+.footer{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    align-items: center;
+    background-color: rgb(208, 200, 190);
+
+}
+
+.center{
+    display: flex;
+    justify-content: center;
+}
+.footer-i i{
+    margin-right: 1rem;
+
+}
+.brand{
+    text-align: center;
+    padding-top: 2px;
+}
+.footer-text {
+    /* margin-top: 5px; */
+    padding-top: 5px;
+}
+
+/* cards */
+.container{
+    margin-top: 2rem !important;
+    flex: 1;
+}
+
+.card{
+    border: none !important;
+    margin-top: 1rem !important;
+}
+.card-body{
+    padding: 0 !important;
+
+}
+.card-text p{
+    margin-top: 0 !important;
+    padding: 0 !important;
+}
+
+.card-img-top{
+    width: 100%;
+    height: 15rem;
+    object-fit: cover;
+    border-radius: 1rem;
+}
+.card-link{
+    text-decoration: none;
+}
+.card-link:hover{
+    opacity: 0.5;
+    background-color:white;
+
+}
+.add-btn{
+    background-color: #fe424d !important;
+    border: none;
+}

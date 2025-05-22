@@ -1,0 +1,48 @@
+<% layout("/layouts/plate") -%>
+
+    <body>
+        <div class="row">
+            <div class="col-8 offset-3">
+                <h3>Rental Detail </h3>
+
+                <div class="card" style="width: 40rem;">
+                    <img src="<%= data1.image %>" class="card-img-top" alt="card_image">
+                    <div class="card-body">
+                        <h5 class="card-title mt-3">
+                            <%= data1.title %>
+                        </h5>
+                        <p class="card-text mb-3 mt-3">
+                            <%= data1.description %>
+                                <br>
+                                &#x20b9 <%= data1.price %>
+                                    <br>
+                                    Price:<%= data1.location %>
+                                        <br>
+                                        Country:<%= data1.country %>
+                        </p>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <a href="/listings/<%= data1._id %>/edit" class="btn btn-dark add-btn col-4 mb-3">Edit</a>
+                    </div>
+                    
+                    <div class="col-3">
+                        <form method="post" action="/listings/<%= data1._id %>?_method=Delete">
+                            <button class="btn btn-dark col-6 mb-3">Delete</button>
+                        </form>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+
+
+
+
+
+
+
+    </body>
