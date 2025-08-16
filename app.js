@@ -3,7 +3,7 @@
 const express=require("express");
 const app=express();
 let port=8080;
-const listing=require("./models/listing.js");
+const Listing=require("./models/listing.js");
 const Review=require("./models/review.js")
 const methodOverride= require("method-override");
 const ejsMate=require("ejs-mate");
@@ -64,28 +64,18 @@ async function main(params) {
 
 
 app.get("/listings", wrapAsync(async (req,res)=>{
-   const allListings= await listing.find({});
-   res.render("index.ejs",{allListings})
+   const allListings= await Listing.find({});
+   res.render("listings/index.ejs",{allListings})
 }))
 
-// show route
-
-app.get("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    // console.log("hello");
-    // res.send(id);
-    const data1= await listing.findById(id).populate("reviews");
-    res.render("show.ejs", {data1});
-    // console.log(data1);
-}))
 
 // new listing route
 
-app.get("/listing/new",(req,res)=>{
-    res.render("newListing.ejs");
+app.get("/listings/new",(req,res)=>{
+    res.render("listings/newListing.ejs");
 })
 
-app.post("/listing",wrapAsync(async(req,res)=>{
+app.post("/listings",wrapAsync(async(req,res)=>{
     // let {title,description,image,price,country,location}=req.body;
     // console.log(title);
     // console.log(description);
@@ -98,18 +88,30 @@ app.post("/listing",wrapAsync(async(req,res)=>{
     // console.log(newData);
     // console.log("data insert successfuly.......");
     let list= req.body.Listing;
-    const newlist=new listing(list);
+    const newlist=new Listing(list);
     await newlist.save();
-    console.log(listing);
+    console.log(Listing);
     res.redirect("/listings");
 }))
+
+// show route
+
+app.get("/listings/:id",wrapAsync(async (req,res)=>{
+    let {id}=req.params;
+    // console.log("hello");
+    // res.send(id);
+    const data1= await Listing.findById(id).populate("reviews");
+    res.render("listings/show.ejs", {data1});
+    // console.log(data1);
+}))
+
 
 // edit route
 app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
     let {id}=req.params;
-    const list=await listing.findById(id);
+    const list=await Listing.findById(id);
     console.log(list);
-    // res.render("edit.ejs",{list});
+    res.render("listings/edit.ejs",{list});
     // res.render("edit.ejs");
 }))
 
@@ -117,7 +119,7 @@ app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
 
 app.put("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
-    const val=await listing.findByIdAndUpdate(id,{...req.body.Listing});
+    const val=await Listing.findByIdAndUpdate(id,{...req.body.Listing});
     console.log(val);
     
     res.redirect(`/listings/${id}`);
@@ -128,7 +130,7 @@ app.put("/listings/:id",wrapAsync(async (req,res)=>{
 
 app.delete("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
-    const del=await listing.findByIdAndDelete(id);
+    const del=await Listing.findByIdAndDelete(id);
     console.log( del);
     console.log("data deleted");
     res.redirect("/listings")
@@ -138,7 +140,7 @@ app.delete("/listings/:id",wrapAsync(async (req,res)=>{
 // review route
 
 app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
-    let list= await listing.findById(req.params.id);
+    let list= await Listing.findById(req.params.id);
     let {id}=req.params;
 
     let newReview=new Review(req.body.review);
@@ -157,7 +159,7 @@ app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
 // delete review route
 app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
     let {id, reviewId}=req.params;
-    await listing.findByIdAndUpdate(id, {$pull:{reviews:reviewId}});
+    await Listing.findByIdAndUpdate(id, {$pull:{reviews:reviewId}});
     await Review.findByIdAndDelete(reviewId);
     res.redirect(`/listings/${id}`);
 
@@ -173,7 +175,7 @@ app.use((err,req,res,next)=>{
     // res.send("Something went wrong!")
     let {status=500,message="something went wrong!"}=err;
     // res.status(status).send(message);
-    res.render("error.ejs",{message})
+    res.render("listings/error.ejs",{message})
 })
 
 app.listen(port,(req,res)=>{
