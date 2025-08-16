@@ -50,9 +50,12 @@ body{
     flex: 1;
 }
 
-.card{
+.listing-card{
     border: none !important;
     margin-top: 1rem !important;
+}
+.review_card{
+    border: 2px;
 }
 .card-body{
     padding: 0 !important;

@@ -4,6 +4,7 @@ const express=require("express");
 const app=express();
 let port=8080;
 const listing=require("./models/listing.js");
+const Review=require("./models/review.js")
 const methodOverride= require("method-override");
 const ejsMate=require("ejs-mate");
 
@@ -73,7 +74,7 @@ app.get("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
     // console.log("hello");
     // res.send(id);
-    const data1= await listing.findById(id);
+    const data1= await listing.findById(id).populate("reviews");
     res.render("show.ejs", {data1});
     // console.log(data1);
 }))
@@ -107,7 +108,8 @@ app.post("/listing",wrapAsync(async(req,res)=>{
 app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
     let {id}=req.params;
     const list=await listing.findById(id);
-    res.render("edit.ejs",{list});
+    console.log(list);
+    // res.render("edit.ejs",{list});
     // res.render("edit.ejs");
 }))
 
@@ -132,6 +134,34 @@ app.delete("/listings/:id",wrapAsync(async (req,res)=>{
     res.redirect("/listings")
 }))
 
+
+// review route
+
+app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
+    let list= await listing.findById(req.params.id);
+    let {id}=req.params;
+
+    let newReview=new Review(req.body.review);
+    // let {id}=req.body;
+    list.reviews.push(newReview);
+    await newReview.save();
+    await list.save();
+    console.log( "new review saved");
+    // res.send("new review saved");
+    
+    res.redirect(`/listings/${id}`);
+    
+    
+}))
+
+// delete review route
+app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
+    let {id, reviewId}=req.params;
+    await listing.findByIdAndUpdate(id, {$pull:{reviews:reviewId}});
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/listings/${id}`);
+
+}))
 // page not found error
 
 app.all("/*splat",(req,res,next)=>{
