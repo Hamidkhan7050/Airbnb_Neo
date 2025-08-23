@@ -12,6 +12,26 @@ const wrapAsync=require("./utils/wrapAsync.js")
 
 const ExpressError=require("./utils/ExpressError.js")
 
+// requiring listing routes
+const listingRouter=require("./routes/listing.js")
+
+// requiring review routes
+const reviewRouter=require("./routes/review.js");
+
+// requirng singup routes
+const userRouter=require("./routes/user.js")
+
+const session=require("express-session");
+
+const flash=require("connect-flash");
+
+// requiring password and authantication related library
+
+const passport=require("passport");
+const LocalStrategy=require("passport-local")
+const User=require("./models/user.js");
+
+
 const path=require("path");
 app.set("view engine","ejs");
 
@@ -46,124 +66,66 @@ async function main(params) {
 // app.get("/",(req,res)=>{
 //     res.send("Hii it is basic or root page");
 // })
-// app.get("/testListing",async(req,res)=>{
-//     // using schema
-//     let samplelisting=new listing({
-//         title:"Hamid villa",
-//         description:"for rent",
-//         price:234,
-//         location:"siwan west",
-//         country:"india"
+// connecting session 
+const sessionOptions={
+    secret:"Mysecretstring",
+    resave:false,
+    saveUninitialized:true,
+    cookies:{
+        expires:Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly:true,
+    }
+}
+
+
+app.use(session(sessionOptions));
+// connecting flash
+app.use(flash());
+
+
+app.use(passport.initialize());
+app.use(passport.session()); 
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+// middleware for authentication and authorization
+
+
+
+app.use((req,res,next)=>{
+    res.locals.success= req.flash("success");
+    res.locals.error=req.flash("error");
+    res.locals.currUser=req.user;
+    
+    next();
+})
+
+// app.get("/demouser",async(req,res)=>{
+//     let fakeUser=new User({
+//         email:"danish.com",
+//         username:"akhtar"
+
 //     })
-//     await samplelisting.save();
-//     console.log("sample was saved");
-//     res.send("successful testing");
-
-
+//     let registerUser=await User.register(fakeUser,"khan");
+//     res.send(registerUser);
 // })
 
 
-app.get("/listings", wrapAsync(async (req,res)=>{
-   const allListings= await Listing.find({});
-   res.render("listings/index.ejs",{allListings})
-}))
 
+// listings related routes
+app.use("/listings",listingRouter);
 
-// new listing route
+// reviews related routes
+app.use("/listings/:id/reviews",reviewRouter);
 
-app.get("/listings/new",(req,res)=>{
-    res.render("listings/newListing.ejs");
-})
+// user relate routes
 
-app.post("/listings",wrapAsync(async(req,res)=>{
-    // let {title,description,image,price,country,location}=req.body;
-    // console.log(title);
-    // console.log(description);
-    // console.log(image);
-    // console.log(price);
-    // console.log(country);
-    // console.log(location);
-    // const newData= await listing.insertOne(title,description,image,country,location,price);
+app.use("/",userRouter);
 
-    // console.log(newData);
-    // console.log("data insert successfuly.......");
-    let list= req.body.Listing;
-    const newlist=new Listing(list);
-    await newlist.save();
-    console.log(Listing);
-    res.redirect("/listings");
-}))
-
-// show route
-
-app.get("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    // console.log("hello");
-    // res.send(id);
-    const data1= await Listing.findById(id).populate("reviews");
-    res.render("listings/show.ejs", {data1});
-    // console.log(data1);
-}))
-
-
-// edit route
-app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const list=await Listing.findById(id);
-    console.log(list);
-    res.render("listings/edit.ejs",{list});
-    // res.render("edit.ejs");
-}))
-
-// update route
-
-app.put("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const val=await Listing.findByIdAndUpdate(id,{...req.body.Listing});
-    console.log(val);
-    
-    res.redirect(`/listings/${id}`);
-
-}))
-
-// DELETE  route
-
-app.delete("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const del=await Listing.findByIdAndDelete(id);
-    console.log( del);
-    console.log("data deleted");
-    res.redirect("/listings")
-}))
-
-
-// review route
-
-app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
-    let list= await Listing.findById(req.params.id);
-    let {id}=req.params;
-
-    let newReview=new Review(req.body.review);
-    // let {id}=req.body;
-    list.reviews.push(newReview);
-    await newReview.save();
-    await list.save();
-    console.log( "new review saved");
-    // res.send("new review saved");
-    
-    res.redirect(`/listings/${id}`);
-    
-    
-}))
-
-// delete review route
-app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
-    let {id, reviewId}=req.params;
-    await Listing.findByIdAndUpdate(id, {$pull:{reviews:reviewId}});
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/listings/${id}`);
-
-}))
 // page not found error
 
 app.all("/*splat",(req,res,next)=>{
