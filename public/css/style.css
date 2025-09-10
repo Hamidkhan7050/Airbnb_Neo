@@ -55,7 +55,9 @@ body{
     margin-top: 1rem !important;
 }
 .review_card{
-    border: 2px;
+    border: solid black 2px;
+    display: flex;
+    
 }
 .card-body{
     padding: 0 !important;
